@@ -2,7 +2,8 @@
 
 From-scratch NumPy implementations of three core machine learning building blocks:
 a **k-NN classifier**, **gradient descent** (1D and 2D), and **PCA via SVD** — plus a
-notebook that runs each one on synthetic data and visualizes the results.
+notebook that runs each one on synthetic data, visualizes the results, and saves every
+figure to `plots/`.
 
 ---
 
@@ -25,9 +26,14 @@ notebook that runs each one on synthetic data and visualizes the results.
 ├── knn.py                        # k-NN distance functions, classifier, grid predictor
 ├── gradient_descent.py           # 1D and 2D gradient descent
 ├── pca.py                        # PCA via SVD
-├── ml_primitives_starter.ipynb   # Runs everything above + generates all plots
+├── ml_primitives_starter.ipynb   # Runs everything above + generates + saves all plots
 ├── requirements.txt              # Dependencies
-├── plots/                        # Saved output figures (optional exports from the notebook)
+├── plots/                        # Output figures, saved as both .svg and .jpg (300 dpi)
+│   ├── KNN initial data.svg / .jpg
+│   ├── KNN decision boundary.svg / .jpg
+│   ├── gradient descent 1d.svg / .jpg
+│   ├── gradient descent 2d.svg / .jpg
+│   └── PCA on 2d data.svg / .jpg
 └── README.md
 ```
 
@@ -41,7 +47,8 @@ jupyter notebook ml_primitives_starter.ipynb
 ```
 
 Run the notebook top to bottom. It imports every function below, generates its own
-synthetic data, and produces all the plots described in this README.
+synthetic data, produces all the plots described in this README, and saves each one into
+`plots/` (as a scalable `.svg` and a 300 dpi `.jpg`) right before displaying it.
 
 ---
 
@@ -60,11 +67,12 @@ synthetic data, and produces all the plots described in this README.
 **What the notebook does:**
 1. Generates two Gaussian-distributed classes (`class_a` centered at `(2, 2)`, `class_b` at
    `(-2, -2)`) and combines them into `X_train` / `y_train`.
-2. Classifies a sample query point with `k=2`.
-3. Builds a `200×200` meshgrid over the data's range, classifies every grid cell with
+2. Plots the raw scatter of the two classes → saved as **`plots/KNN initial data`**.
+3. Classifies a sample query point with `k=2`.
+4. Builds a `200×200` meshgrid over the data's range, classifies every grid cell with
    `predict_grid`, reshapes the flat predictions back to the grid's shape, and shades the
-   result with `contourf` — the classic k-NN decision boundary plot, with the training
-   points overlaid on top.
+   result with `contourf`, with the training points overlaid on top → saved as
+   **`plots/KNN decision boundary`**.
 
 **Vectorization note:** `distance_to_all` computes distances to the whole training set in
 one NumPy call (`np.linalg.norm(points - query, axis=1)`), which is what keeps `knn_predict`
@@ -91,11 +99,11 @@ descent outside of toy circular loss surfaces.
    learning rates — `0.001, 0.01, 0.03, 0.09, 0.9` — and plots the value of `x` over 100
    steps for each on one chart. The smaller rates converge cleanly; `lr = 0.9` overshoots
    the minimum on every step and visibly **oscillates**, demonstrating what an unstable
-   learning rate looks like.
+   learning rate looks like → saved as **`plots/gradient descent 1d`**.
 2. **2D path over a contour plot:** starts at `(4, 4)` with `lr = 0.05` for 10 steps, plots
    the loss surface `f2` as a contour map, and overlays the descent path as connected
    markers — you can see it curve toward the origin, moving faster along the shallower `x`
-   direction than the steeper `y` direction.
+   direction than the steeper `y` direction → saved as **`plots/gradient descent 2d`**.
 
 ---
 
@@ -122,7 +130,8 @@ descent outside of toy circular loss surfaces.
    - the 1D projection of each point onto that line.
 
    The direction line visibly runs along the long axis of the scatter, confirming the SVD
-   correctly recovered the dominant direction of variance.
+   correctly recovered the dominant direction of variance → saved as
+   **`plots/PCA on 2d data`**.
 
 ---
 
@@ -136,6 +145,10 @@ descent outside of toy circular loss surfaces.
   per pixel of the decision boundary), not training points.
 - Every plot in the notebook includes axis labels, a title, and a legend where more than one
   series is shown.
+- Every plot is written to `plots/` in two formats before it's displayed — an `.svg` for
+  crisp, resolution-independent viewing/editing and a `.jpg` (300 dpi) for quick previews or
+  embedding elsewhere — via `plt.savefig(..., bbox_inches="tight")` immediately before
+  `plt.show()`.
 
 ---
 
@@ -161,3 +174,7 @@ final_x, history = gradient_descent_1d(start=10, lr=0.1, steps=50)
 data = np.random.randn(100, 2) @ np.array([[3, 0], [0, 0.5]])
 projection, components = pca_via_svd(data, n_components=1)
 ```
+
+> Note: if running the notebook fresh on a clone of this repo, make sure a `plots/` folder
+> exists in the working directory first (`mkdir -p plots`) — `plt.savefig` won't create it
+> automatically.
